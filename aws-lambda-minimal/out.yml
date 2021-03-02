@@ -1,20 +1,19 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Transform: 'AWS::Serverless-2016-10-31'
+Transform: AWS::Serverless-2016-10-31
 Description: An AWS Lambda application that calls the Lambda API.
 Resources:
   function:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: target/aws-lambda-minimal-1.0-SNAPSHOT.jar
+      CodeUri: s3://lambda-artifacts-f9da1deb1ebfc6fd/5e9342889a76395bf5a1a6440d702c93
       Handler: io.neocdtv.Handler
       Runtime: java8
       Description: Java function
       MemorySize: 512
       Timeout: 10
-      # Function's execution role
       Policies:
-        - AWSLambdaBasicExecutionRole
-        - AWSLambdaReadOnlyAccess
-        - AWSXrayWriteOnlyAccess
-        - AWSLambdaVPCAccessExecutionRole
+      - AWSLambdaBasicExecutionRole
+      - AWSLambdaReadOnlyAccess
+      - AWSXrayWriteOnlyAccess
+      - AWSLambdaVPCAccessExecutionRole
       Tracing: Active

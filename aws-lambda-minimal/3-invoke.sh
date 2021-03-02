@@ -1,6 +1,6 @@
 #!/bin/bash
 set -eo pipefail
-FUNCTION=$(aws cloudformation describe-stack-resource --stack-name java-basic --logical-resource-id function --query 'StackResourceDetail.PhysicalResourceId' --output text)
+FUNCTION=$(aws cloudformation describe-stack-resource --stack-name aws-lambda-minimal --logical-resource-id function --query 'StackResourceDetail.PhysicalResourceId' --output text)
 if [ $1 ]
 then
   case $1 in
