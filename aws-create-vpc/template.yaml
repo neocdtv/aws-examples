@@ -1,0 +1,70 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: false
+      EnableDnsSupport: true
+      InstanceTenancy: default
+  SubnetPublic:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 10.0.1.0/24
+      MapPublicIpOnLaunch: true
+      VpcId: !Ref VPC
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-0be2609ba883822ec
+      InstanceType: t2.micro
+      KeyName: key-2
+      SubnetId: !Ref SubnetPublic
+      SecurityGroupIds:
+        - Ref: EC2InstanceSecurityGroup
+      UserData:
+        Fn::Base64:
+          !Sub |
+          #!/bin/bash -xe
+          yum update -y aws-cfn-bootstrap
+  EC2InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable SSH access via port 22
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+          IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: 0.0.0.0/0
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+  InternetGatewayVPCAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+  RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+  Route:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref RouteTable
+  RouteTableSubnetPublicAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RouteTable
+      SubnetId: !Ref SubnetPublic
+
+Outputs:
+  InstanceId:
+    Description: InstanceId of the newly created EC2 instance
+    Value: !Ref EC2Instance
+  PublicIP:
+    Description: Public IP address of the newly created EC2 instance
+    Value: !GetAtt EC2Instance.PublicIp
+
